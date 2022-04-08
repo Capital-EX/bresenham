@@ -1,0 +1,1 @@
+Provides the bresenham word for computing points along a line.
