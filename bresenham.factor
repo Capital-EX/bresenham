@@ -2,7 +2,7 @@
 ! See http://factorcode.org/license.txt for BSD license.
 
 USING: arrays combinators fry io kernel locals math math.parser
-namespaces ranges sequences sequences.deep
+math.vectors namespaces ranges sequences sequences.deep
 sequences.generalizations ;
 IN: bresenham
 
@@ -17,9 +17,6 @@ IN: bresenham
 : <bresenham-iter> ( p0 p1 -- bresenham-iter )
     swap [ - ] 2map { 1 } prepend ?reverse-iter ;
 
-: >x0,x1 ( p0 p1 -- x0 x1 )
-    [ first ] bi@ ; inline
-
 : >y0,y1 ( p0 p1 -- y0 y1 )
     [ second ] bi@ ; inline
 
@@ -27,7 +24,7 @@ IN: bresenham
     2 tail* first2 ;
 
 : lo-or-hi? ( p0 p1 -- ? )
-    [ >y0,y1 - abs ] [ >x0,x1 - abs ] 2bi < ;
+    vs- vabs [ second ] [ first ] bi < ;
 
 : compute-d ( d0 d1 -- d )
     [ 2 * ] [ - ] bi* ;
@@ -91,4 +88,3 @@ PRIVATE>
 : bresenham ( p0 p1 -- points )
     [ ?reverse-components setup-bresenham ] 
     [ ?reverse-each-xy compute-bresenham ] 2bi ;
-
