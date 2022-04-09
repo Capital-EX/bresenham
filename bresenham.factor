@@ -29,37 +29,31 @@ IN: bresenham
 : compute-d ( d0 d1 -- d )
     [ 2 * ] [ - ] bi* ;
 
-: (next-d) ( d bresenham-iter -- d' )
-    swap dup 0 > 
+: next-d ( bresenham-iter d -- d' )
+    dup 0 > 
     [ [ last2 - ] [ neg compute-d ] bi* ] 
     [ [ second  ] [ neg compute-d ] bi* ] if ;
 
-: (next-x|y) ( x|y bresenham-iter d -- x'|y' )
+: next-x ( x bresenham-iter d -- x' )
     0 > [ first + ] [ drop ] if ;
 
-: next-d ( d x|y bresenham-iter -- d' )
-    nip (next-d) ;
+:: next-plot ( d x bresenham-iter -- d x'  )
+    bresenham-iter d next-d x bresenham-iter d next-x ;
 
-: next-x|y ( d x|y bresenham-iter -- x'|y' )
-    pick (next-x|y) nip ;
+:: compute-point ( d x y bresenham-iter -- d' x' {x,y} )
+     d x bresenham-iter next-plot x y 2array ;
 
-: next-plot ( d x|y bresenham-iter -- d x'|y'  )
-    [ next-d ] [ next-x|y ] 3bi ;
+:: d ( _ _ bresenham-iter -- d )
+    bresenham-iter last2 compute-d ;
 
-: compute-point ( d x|y y|x bresenham-iter -- d' x'|y' {x,y} )
-    '[ drop _ next-plot ] [ 2array nip ] 3bi ;
+:: start-point ( p0 _ _ -- start-point )
+    p0 first ;
 
-: d ( _ _ bresenham-iter -- d )
-    2nip last2 compute-d ;
+:: stride ( p0 p1 _ -- stride )
+    p0 p1 >y0,y1 [a..b] ;
 
-: start-point ( p0 _ _ -- start-point )
-    2drop first ;
-
-: stride ( p0 p1 _ -- stride )
-    drop >y0,y1 [a..b] ;
-
-: point-generator ( _ _ bresenham-iter -- quot )
-    2nip '[ _ compute-point ] ;
+:: point-generator ( _ _ bresenham-iter -- quot )
+    [ bresenham-iter compute-point ] ;
 
 : (setup-bresenham) ( p0 p1 -- d start-point stride quot  )
     2dup <bresenham-iter> { 
