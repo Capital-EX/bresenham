@@ -29,64 +29,59 @@ IN: bresenham
 : lo-or-hi? ( p0 p1 -- ? )
     [ >y0,y1 - abs ] [ >x0,x1 - abs ] 2bi < ;
 
-: (compute-d) ( d0 d1 -- d )
+: compute-d ( d0 d1 -- d )
     [ 2 * ] [ - ] bi* ;
-
-: compute-d ( bresenham-iter -- d )
-    last2 (compute-d) ;
 
 : (next-d) ( d bresenham-iter -- d' )
     swap dup 0 > 
-    [ [ last2 - ] [ neg (compute-d) ] bi* ] 
-    [ [ second  ] [ neg (compute-d) ] bi* ] if ;
-
-: next-d ( d x|y bresenham-iter -- d' )
-    nip (next-d) ;
+    [ [ last2 - ] [ neg compute-d ] bi* ] 
+    [ [ second  ] [ neg compute-d ] bi* ] if ;
 
 : (next-x|y) ( x|y bresenham-iter d -- x'|y' )
     0 > [ first + ] [ drop ] if ;
 
-: next-x|y ( d x|y bresenham-iter -- 'x|y' )
+: next-d ( d x|y bresenham-iter -- d' )
+    nip (next-d) ;
+
+: next-x|y ( d x|y bresenham-iter -- x'|y' )
     pick (next-x|y) nip ;
 
 : next-plot ( d x|y bresenham-iter -- d x'|y'  )
     [ next-d ] [ next-x|y ] 3bi ;
 
-: (compute-point) ( d x|y y|x bresenham-iter -- d' x'|y' {x,y} )
+: compute-point ( d x|y y|x bresenham-iter -- d' x'|y' {x,y} )
     '[ drop _ next-plot ] [ 2array nip ] 3bi ;
 
 : d ( _ _ bresenham-iter -- d )
-    2nip compute-d
+    2nip last2 compute-d
 
 : start-point ( p0 _ _ -- start-point )
-     2drop first
+    2drop first
 
 : stride ( p0 p1 _ -- stride )
-     drop >y0,y1 [a..b]
+    drop >y0,y1 [a..b]
 
-: compute-point ( _ _ bresenham-iter -- quot )
-    2nip '[ _ (compute-point) ]
+: point-generator ( _ _ bresenham-iter -- quot )
+    2nip '[ _ compute-point ]
 
 : (setup-bresenham) ( p0 p1 -- d start-point stride quot  )
     2dup <bresenham-iter> { 
-        [ d ] [ start-point ] [ stride ] [ compute-point ]
+        [ d ] [ start-point ] [ stride ] [ point-generator ]
     } 3cleave ;
 
-: ?reverse-components ( p0 p1 -- p0' p1' )
+: ?reverse-components ( xy0 xy1 -- ?yx0 ?yx1 )
     2dup lo-or-hi? [ [ reverse ] bi@ ] when ;
 
-: setup-bresenham ( u v -- d start-point [a..b] quot ) 
-    2dup >y0,y1 > [ swap ] when (setup-plot) ;
+: setup-bresenham ( p0 p1 -- d start-point stride quot ) 
+    2dup >y0,y1 > [ swap ] when (setup-bresenham) ;
 
-: ?reverse-each-xy ( quot p0 p1 -- quot )
+: ?reverse-each-xy ( quot p0 p1 -- quot' )
     lo-or-hi? [ [ reverse ] compose ] when ;
 
-: compute-bresenham ( d start-point [a..b] quot -- points )
+: compute-bresenham ( d start-point stride quot -- points )
     '[ _ call( x x x -- x x x ) ] map 2nip ;
 
 PRIVATE>
-
-
 
 !
 ! I have no idea why I went through the trouble of writing
