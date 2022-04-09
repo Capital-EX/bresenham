@@ -53,16 +53,16 @@ IN: bresenham
     '[ drop _ next-plot ] [ 2array nip ] 3bi ;
 
 : d ( _ _ bresenham-iter -- d )
-    2nip last2 compute-d
+    2nip last2 compute-d ;
 
 : start-point ( p0 _ _ -- start-point )
-    2drop first
+    2drop first ;
 
 : stride ( p0 p1 _ -- stride )
-    drop >y0,y1 [a..b]
+    drop >y0,y1 [a..b] ;
 
 : point-generator ( _ _ bresenham-iter -- quot )
-    2nip '[ _ compute-point ]
+    2nip '[ _ compute-point ] ;
 
 : (setup-bresenham) ( p0 p1 -- d start-point stride quot  )
     2dup <bresenham-iter> { 
@@ -88,7 +88,7 @@ PRIVATE>
 ! bresenham like this, but I did. This was very hard to write.
 ! 
 
-: bresenham ( u v -- points )
+: bresenham ( p0 p1 -- points )
     [ ?reverse-components setup-bresenham ] 
     [ ?reverse-each-xy compute-bresenham ] 2bi ;
 
