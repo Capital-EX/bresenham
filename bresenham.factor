@@ -74,11 +74,6 @@ IN: bresenham
 
 PRIVATE>
 
-!
-! I have no idea why I went through the trouble of writing
-! bresenham like this, but I did. This was very hard to write.
-! 
-
 : bresenham ( p0 p1 -- points )
     [ ?reverse-components setup-bresenham ] 
     [ ?reverse-each-xy compute-bresenham ] 2bi ;
